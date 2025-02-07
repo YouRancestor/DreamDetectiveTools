@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<head>
+    <script>
+        // 回车转tab键切换焦点
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+
+                // 获取当前活动元素
+                var activeElement = document.activeElement;
+
+                // 查找下一个可聚焦的元素
+                var focusableElements = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
+                var allFocusableElements = Array.prototype.slice.call(document.querySelectorAll(focusableElements), 0);
+                var index = allFocusableElements.indexOf(activeElement);
+
+                // 如果当前元素不在列表中，将其设置为第一个元素
+                if (index === -1) {
+                    index = 0;
+                }
+
+                // 聚焦到下一个元素，如果已经是最后一个，则回到第一个
+                var nextElementIndex = (index + 1) % allFocusableElements.length;
+                allFocusableElements[nextElementIndex].focus();
+            }
+        });
+
+        // 输入框为空时自动填充0
+        function resetInput(e) {
+            if (e.value == '')
+            {
+                e.value = 0;
+                recalc();
+            }
+        }
+
+        // 分数计算
+        function recalc() {
+            var sum = document.getElementById('sum');
+            var sum_save_doctor = document.getElementById('sum_save_doctor');
+
+            var score = 0;
+            var nums = Array(10).fill(0);
+            for (var lv = 1; lv < 11; lv++) {
+                nums[lv-1] = parseInt(document.getElementById(`lv${lv}`).value);
+            }
+
+            // 书包分数计算
+            var num_bag = parseInt(document.getElementById('lv0').value);
+            num_lv1 = num_bag * 3
+            score += num_lv1;
+            var energy = document.getElementById('energy');
+            energy.innerHTML = num_lv1;
+            nums[0] = num_lv1;
+
+            // 1-9 级分数计算
+
+            for (var lv = 1; lv < 10; lv++) {
+                var num_lv = nums[lv-1];
+                var num_add_next = Math.floor(num_lv / 2);
+                nums[lv] += num_add_next;
+                score += num_add_next * (lv+1);
+            }
+
+            sum_save_doctor.innerHTML = score;
+
+            // 10 级分数计算
+            score += nums[9] * 20;
+
+            sum.innerHTML = score;
+
+            var num_lv10 = document.getElementById('num_lv10');
+            num_lv10.innerHTML = nums[9]
+        }
+
+        // 生成列表
+        window.onload = function() {
+            var li = document.getElementById('li');
+
+            for (var lv = 1; lv < 11; lv++) {
+                var unit = `\
+                <div>\
+                    <span>lv${lv}</span>\
+                    <input id = "lv${lv}" type="number" value="0" onfocus="this.select()" onfocusout="resetInput(this)" />\
+                </div>`;
+                li.innerHTML += unit;
+            }
+
+            for (var lv = 0; lv < 11; lv++) {
+                var lv_input = document.getElementById(`lv${lv}`);
+                lv_input.addEventListener('change', recalc);
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <h1>
+        童年回忆藏分计算器
+    </h1>
+    
+    <span>课本</span>&nbsp;<span>个数</span>
+
+    <div id = "li">
+        <div>
+            <span>书包</span><input id = "lv0" type="number" value="0" onfocus="this.select()" onfocusout="resetInput(this)" />
+        </div>
+    </div>
+    
+    <div id = "score">
+        <span>需要体力：</span><span id="energy">0</span><br />
+        <span>最终博士学位：</span><span id = "num_lv10">0</span><span>个</span><br />
+        <span>藏分（不消耗博士学位）：</span><span id="sum_save_doctor">0</span><br />
+        <span>藏分（消耗博士学位）：</span><span id="sum">0</span><br />
+    </div>
+</body>
+<html>
